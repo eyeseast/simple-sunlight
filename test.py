@@ -27,11 +27,15 @@ class LegislatorTest(SunlightTest):
 
 class DistrictTest(SunlightTest):
     
-    def testGet(self):
-        pass
+    def testGetFromZip(self):
+        url = "http://services.sunlightlabs.com/api/districts.getDistrictsFromZip?apikey=9a097f6d04afc2174e3946ab715cc6a2&zip=91355"
+        query = self.sunlight.districts.getDistrictsFromZip(zip=91355)
+        self.compare(url, query, 'districts')
     
-    def testList(self):
-        pass
+    def testLatLong(self):
+        url = "http://services.sunlightlabs.com/api/districts.getDistrictFromLatLong.json?latitude=35.778788&longitude=-78.787805&apikey=9a097f6d04afc2174e3946ab715cc6a2"
+        query = self.sunlight.districts.getDistrictFromLatLong(latitude=35.778788, longitude=-78.787805)
+        self.compare(url, query, 'districts')
 
 class CommitteeTest(SunlightTest):
     
