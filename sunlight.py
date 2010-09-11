@@ -37,7 +37,7 @@ class Sunlight(object):
     
     >>> sunlight = Sunlight('9a097f6d04afc2174e3946ab715cc6a2')
     >>> pelosi = sunlight.legislators.get(lastname='pelosi')
-    >>> print pelosi['first_name']
+    >>> print pelosi['firstname']
     Nancy
     """
     def __init__(self, apikey, method=None):
