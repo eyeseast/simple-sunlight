@@ -1,9 +1,19 @@
+"""
+A really simple wrapper for Sunlight's Congress API
+"""
+__author__ = "Chris Amico (eyeseast@gmail.com)"
+__version__ = "0.1.1"
+__copyright__ = "Copyright (c) 2010 Derek Willis"
+__license__ = "MIT"
+
+
 import urllib, urllib2
 try:
     import json
 except ImportError:
     import simplejson as json
 
+__all__ = ['SunlightError', 'Sunlight']
 
 BASE_URL = "http://services.sunlightlabs.com/api/%s.json?%s"
 
