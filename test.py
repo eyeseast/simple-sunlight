@@ -1,18 +1,21 @@
+import os
 import unittest
 import urllib2
 from sunlight import Sunlight, SunlightError, json
 
+API_KEY = os.environ.get('SUNLIGHT_API_KEY', '')
+
 class SunlightTest(unittest.TestCase):
     
     def setUp(self):
-        self.sunlight = Sunlight('9a097f6d04afc2174e3946ab715cc6a2')
+        self.sunlight = Sunlight(API_KEY)
     
     def compare(self, url, query, response_key):
         control = json.load(urllib2.urlopen(url))['response'][response_key]
         self.assertEqual(control, query)
     
     def testMethod(self):
-        sunlight = Sunlight('9a097f6d04afc2174e3946ab715cc6a2', 'legislators')
+        sunlight = Sunlight(API_KEY, 'legislators')
         self.assertEqual(sunlight.method, 'legislators')
 
 class LegislatorTest(SunlightTest):

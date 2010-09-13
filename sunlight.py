@@ -45,7 +45,7 @@ class Sunlight(object):
     
     Instantiate a Sunlight object with your API key:
     
-    >>> sunlight = Sunlight('9a097f6d04afc2174e3946ab715cc6a2')
+    >>> sunlight = Sunlight(API_KEY)
     >>> pelosi = sunlight.legislators.get(lastname='pelosi')
     >>> print pelosi['firstname']
     Nancy
