@@ -6,7 +6,7 @@ __version__ = "0.1.1"
 __copyright__ = "Copyright (c) 2010 Chris Amico"
 __license__ = "MIT"
 
-
+import os
 import urllib, urllib2
 try:
     import json
@@ -50,8 +50,8 @@ class Sunlight(object):
     >>> print pelosi['firstname']
     Nancy
     """
-    def __init__(self, apikey, method=None):
-        self.apikey = apikey
+    def __init__(self, apikey=None, method=None):
+        self.apikey = apikey or os.environ.get('SUNLIGHT_API_KEY', '')
         self.method = method
     
     def __getattr__(self, method):
