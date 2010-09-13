@@ -3,7 +3,7 @@ A really simple wrapper for Sunlight's Congress API
 """
 __author__ = "Chris Amico (eyeseast@gmail.com)"
 __version__ = "0.1.1"
-__copyright__ = "Copyright (c) 2010 Derek Willis"
+__copyright__ = "Copyright (c) 2010 Chris Amico"
 __license__ = "MIT"
 
 
