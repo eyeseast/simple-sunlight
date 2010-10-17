@@ -22,7 +22,7 @@ RESPONSE_KEYS = {
 
     'legislators.get':                  'legislator',
     'legislators.getList':              'legislators',
-    'legislators.search':               'legislators',
+    'legislators.search':               'results',
     'legislators.allForZip':            'legislators',
     'legislators.allForLatLong':        'legislators',
 
