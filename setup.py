@@ -6,7 +6,7 @@ readme = open('README.md', 'rb').read()
 
 setup(
     name = "simple-sunlight",
-    version = "0.1.1",
+    version = "0.1.2",
     description = "A simpler wrapper for Sunlight's Congress API",
     long_description = readme,
     author="Chris Amico",
@@ -14,5 +14,4 @@ setup(
     py_modules = ['sunlight'],
     download_url = "http://github.com/eyeseast/simple-sunlight",
     url = "http://github.com/eyeseast/simple-sunlight",
-    install_requires=["simplejson >= 1.8"]
 )
