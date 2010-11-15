@@ -21,19 +21,19 @@ BASE_URL = "http://services.sunlightlabs.com/api/%s.json?%s"
 RESPONSE_KEYS = {
     # simple keys to skip the level we already know
 
-    'legislators.get':                  'legislator',
-    'legislators.getList':              'legislators',
-    'legislators.search':               'results',
-    'legislators.allForZip':            'legislators',
-    'legislators.allForLatLong':        'legislators',
+    'legislators.get':                  lambda r: r['legislator'],
+    'legislators.getList':              lambda r: [d['legislator'] for d in r['legislators']],
+    'legislators.search':               lambda r: r['results'],
+    'legislators.allForZip':            lambda r: [d['legislator'] for d in r['legislators']],
+    'legislators.allForLatLong':        lambda r: [d['legislator'] for d in r['legislators']],
 
-    'districts.getDistrictsFromZip':    'districts',
-    'districts.getZipsFromDistrict':    'zips',
-    'districts.getDistrictFromLatLong': 'districts',
+    'districts.getDistrictsFromZip':    lambda r: [d['district'] for d in r['districts']],
+    'districts.getZipsFromDistrict':    lambda r: r['zips'],
+    'districts.getDistrictFromLatLong': lambda r: [d['district'] for d in r['districts']],
     
-    'committees.getList':               'committees',
-    'committees.get':                   'committee',
-    'committees.allForLegislator':      'committees',
+    'committees.getList':               lambda r: [d['committee'] for d in r['committees']],
+    'committees.get':                   lambda r: r['committee'],
+    'committees.allForLegislator':      lambda r: [d['committee'] for d in r['committees']],
 }
 
 class SunlightError(Exception):
@@ -71,7 +71,12 @@ class Sunlight(object):
         except Exception, e:
             raise SunlightError(e)
         
-        return json.loads(content)['response'][RESPONSE_KEYS[self.method]]
+        content = json.loads(content)
+        parse = RESPONSE_KEYS.get(self.method)
+        if callable(parse):
+            content = parse(content['response'])
+        
+        return content
     
     def __repr__(self):
         return "<Sunlight: %s>" % self.method
