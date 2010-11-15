@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>sunlight.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  
+  <table cellspacing=0 cellpadding=0>
+  <thead>
+    <tr>
+      <th class=docs><h1>sunlight.py</h1></th>
+      <th class=code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id='section-0'>
+      <td class=docs>
+        <div class="octowrap">
+          <a class="octothorpe" href="#section-0">#</a>
+        </div>
+        
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A really simple wrapper for Sunlight&#39;s Congress API</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;Chris Amico (eyeseast@gmail.com)&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;0.1.3&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (c) 2010 Chris Amico&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;MIT&quot;</span></pre></div></pre></div>
+      </td>
+    </tr><tr id='section-1'>
+      <td class=docs>
+        <div class="octowrap">
+          <a class="octothorpe" href="#section-1">#</a>
+        </div>
+        <h2>Simple Sunlight</h2>
+<p>A Python client for the Sunlight Foundation's
+<a href="http://services.sunlightlabs.com/docs/Sunlight_Congress_API/">Congress API</a>.
+It returns JSON with fat trimmed. What you do with that is up to you.
+It should stay out of your way.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><div class="highlight"><pre><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">import</span> <span class="nn">httplib2</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">json</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">simplejson</span> <span class="kn">as</span> <span class="nn">json</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;SunlightError&#39;</span><span class="p">,</span> <span class="s">&#39;Sunlight&#39;</span><span class="p">]</span>
+
+<span class="n">BASE_URL</span> <span class="o">=</span> <span class="s">&quot;http://services.sunlightlabs.com/api/</span><span class="si">%s</span><span class="s">.json?</span><span class="si">%s</span><span class="s">&quot;</span>
+
+<span class="n">RESPONSE_KEYS</span> <span class="o">=</span> <span class="p">{</span></pre></div></pre></div>
+      </td>
+    </tr><tr id='section-2'>
+      <td class=docs>
+        <div class="octowrap">
+          <a class="octothorpe" href="#section-2">#</a>
+        </div>
+        <p>Responses come back with metadata we don't need,
+so we trim fat where we can.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><div class="highlight"><pre>    <span class="s">&#39;legislators.get&#39;</span><span class="p">:</span>                  <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s">&#39;legislator&#39;</span><span class="p">],</span>
+    <span class="s">&#39;legislators.getList&#39;</span><span class="p">:</span>              <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;legislator&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s">&#39;legislators&#39;</span><span class="p">]],</span>
+    <span class="s">&#39;legislators.search&#39;</span><span class="p">:</span>               <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s">&#39;results&#39;</span><span class="p">],</span>
+    <span class="s">&#39;legislators.allForZip&#39;</span><span class="p">:</span>            <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;legislator&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s">&#39;legislators&#39;</span><span class="p">]],</span>
+    <span class="s">&#39;legislators.allForLatLong&#39;</span><span class="p">:</span>        <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;legislator&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s">&#39;legislators&#39;</span><span class="p">]],</span>
+
+    <span class="s">&#39;districts.getDistrictsFromZip&#39;</span><span class="p">:</span>    <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;district&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s">&#39;districts&#39;</span><span class="p">]],</span>
+    <span class="s">&#39;districts.getZipsFromDistrict&#39;</span><span class="p">:</span>    <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s">&#39;zips&#39;</span><span class="p">],</span>
+    <span class="s">&#39;districts.getDistrictFromLatLong&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;district&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s">&#39;districts&#39;</span><span class="p">]],</span>
+    
+    <span class="s">&#39;committees.getList&#39;</span><span class="p">:</span>               <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;committee&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s">&#39;committees&#39;</span><span class="p">]],</span>
+    <span class="s">&#39;committees.get&#39;</span><span class="p">:</span>                   <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s">&#39;committee&#39;</span><span class="p">],</span>
+    <span class="s">&#39;committees.allForLegislator&#39;</span><span class="p">:</span>      <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;committee&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s">&#39;committees&#39;</span><span class="p">]],</span>
+<span class="p">}</span></pre></div></pre></div>
+      </td>
+    </tr><tr id='section-3'>
+      <td class=docs>
+        <div class="octowrap">
+          <a class="octothorpe" href="#section-3">#</a>
+        </div>
+        <p>A basic error subclass for anything that goes wrong</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><div class="highlight"><pre><span class="k">class</span> <span class="nc">SunlightError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="s">&quot;Exception for Sunlight API&quot;</span></pre></div></pre></div>
+      </td>
+    </tr><tr id='section-4'>
+      <td class=docs>
+        <div class="octowrap">
+          <a class="octothorpe" href="#section-4">#</a>
+        </div>
+        <p>The main <strong>Sunlight</strong> class handles methods and arguments
+in a way that still feels like Python.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><div class="highlight"><pre><span class="k">class</span> <span class="nc">Sunlight</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A really simple Sunlight API client that just returns JSON</span>
+<span class="sd">    </span>
+<span class="sd">    Instantiate a Sunlight object with your API key:</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; sunlight = Sunlight(API_KEY)</span>
+<span class="sd">    &gt;&gt;&gt; pelosi = sunlight.legislators.get(lastname=&#39;pelosi&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print pelosi[&#39;firstname&#39;]</span>
+<span class="sd">    Nancy</span>
+<span class="sd">    &quot;&quot;&quot;</span></pre></div></pre></div>
+      </td>
+    </tr><tr id='section-5'>
+      <td class=docs>
+        <div class="octowrap">
+          <a class="octothorpe" href="#section-5">#</a>
+        </div>
+        <p>Instantiate a Sunlight object with your API key: </p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apikey</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="s">&#39;.cache&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apikey</span> <span class="o">=</span> <span class="n">apikey</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;SUNLIGHT_API_KEY&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+        </pre></div></pre></div>
+      </td>
+    </tr><tr id='section-6'>
+      <td class=docs>
+        <div class="octowrap">
+          <a class="octothorpe" href="#section-6">#</a>
+        </div>
+        <p>Caching is pluggable. Pass in memcache and httplib2
+will use that instead of filesystem caching.
+See <a href="http://httplib2.googlecode.com/hg/doc/html/libhttplib2.html#id2">httplib2</a>
+docs for more on pluggable caching.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">cache</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">http</span> <span class="o">=</span> <span class="n">httplib2</span><span class="o">.</span><span class="n">Http</span><span class="p">(</span><span class="n">cache</span><span class="p">)</span>
+    </pre></div></pre></div>
+      </td>
+    </tr><tr id='section-7'>
+      <td class=docs>
+        <div class="octowrap">
+          <a class="octothorpe" href="#section-7">#</a>
+        </div>
+        <p>Namespaces are defined on the fly. Ask for an arbitrary
+method and Sunlight will tack it on. For example:</p>
+<pre><code>&gt;&gt;&gt; sunlight = Sunlight(API_KEY)
+&gt;&gt;&gt; sunlght.foo
+&lt;Sunlight: foo&gt;
+&gt;&gt;&gt; sunlight.foo.bar
+&lt;Sunlight: foo.bar&gt;
+</code></pre>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Sunlight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apikey</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="n">method</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Sunlight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apikey</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+    </pre></div></pre></div>
+      </td>
+    </tr><tr id='section-8'>
+      <td class=docs>
+        <div class="octowrap">
+          <a class="octothorpe" href="#section-8">#</a>
+        </div>
+        <p>Calling any attribute (as defined above) puts everything
+together and makes the actual API call. Read the API documentation
+at <a href="http://services.sunlightlabs.com/docs/Sunlight_Congress_API/">Sunlight</a>
+for specific arguments.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">params</span><span class="p">[</span><span class="s">&#39;apikey&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apikey</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">BASE_URL</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlencode</span><span class="p">(</span><span class="n">params</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">resp</span><span class="p">,</span> <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SunlightError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        
+        <span class="n">content</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+        <span class="n">parse</span> <span class="o">=</span> <span class="n">RESPONSE_KEYS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">parse</span><span class="p">):</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s">&#39;response&#39;</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">content</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;Sunlight: </span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span>
+
+</pre></div></pre></div>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>
