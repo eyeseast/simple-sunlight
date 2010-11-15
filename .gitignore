@@ -1,4 +1,22 @@
-*.pyc
-build
+*.py[co]
+
+# Packages
+*.egg
+*.egg-info
 dist
+build
+eggs
+parts
+bin
+develop-eggs
+.installed.cfg
 MANIFEST
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+
+.cache

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import unittest
 import urllib2
@@ -13,6 +14,8 @@ class SunlightTest(unittest.TestCase):
     def compare(self, url, query, response_key):
         control = json.load(urllib2.urlopen(url))['response'][response_key]
         self.assertEqual(control, query)
+
+class ClientTest(SunlightTest):
     
     def testMethod(self):
         sunlight = Sunlight(API_KEY, 'legislators')

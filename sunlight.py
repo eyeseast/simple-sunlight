@@ -7,7 +7,8 @@ __copyright__ = "Copyright (c) 2010 Chris Amico"
 __license__ = "MIT"
 
 import os
-import urllib, urllib2
+import urllib
+import httplib2
 try:
     import json
 except ImportError:
@@ -50,25 +51,27 @@ class Sunlight(object):
     >>> print pelosi['firstname']
     Nancy
     """
-    def __init__(self, apikey=None, method=None):
+    def __init__(self, apikey=None, method=None, cache='.cache'):
         self.apikey = apikey or os.environ.get('SUNLIGHT_API_KEY', '')
+        self.cache = cache
+        self.http = httplib2.Http(cache)
         self.method = method
     
     def __getattr__(self, method):
         if self.method:
-            return Sunlight(self.apikey, "%s.%s" % (self.method, method))
+            return Sunlight(self.apikey, "%s.%s" % (self.method, method), self.cache)
         else:
-            return Sunlight(self.apikey, method)
+            return Sunlight(self.apikey, method, self.cache)
     
     def __call__(self, **params):
         params['apikey'] = self.apikey
         url = BASE_URL % (self.method, urllib.urlencode(params))
         try:
-            response = urllib2.urlopen(url).read()
+            resp, content = self.http.request(url)
         except Exception, e:
             raise SunlightError(e)
         
-        return json.loads(response)['response'][RESPONSE_KEYS[self.method]]
+        return json.loads(content)['response'][RESPONSE_KEYS[self.method]]
     
     def __repr__(self):
         return "<Sunlight: %s>" % self.method
